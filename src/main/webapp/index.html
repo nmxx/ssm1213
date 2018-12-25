@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>index</title>
+    <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+
+    <script type="text/javascript">
+        $(()=>{
+            $.ajax({
+                url:"members",
+                type:"get",
+                dataType:"json",
+                success:function (data) {
+                    if(data){
+                        $.each(data,(i,val)=>{
+                            $("#t1").append(`<tr id="${val.meId}"><td>${val.meId}</td><td>${val.meName}</td><td>${val.mePhone}</td>
+                                <td>${val.meLevel}</td><td>${val.meCardNo}</td><td>${val.meInTime}</td>
+                                <td><button type="button" onclick="updateMe(${val.meId})">修改</button>
+                                <button type="button" onclick="del(${val.meId})">删除</button></td><tr/>`)
+
+
+
+                        })
+                    }
+                }
+
+            })
+
+
+            $("#btn1").click(()=>{
+                let meName=$.trim($("#meName").val())
+                let meCardNo=$.trim($("#meCardNo").val())
+
+                $.ajax({
+                    url: "members/findMember",
+                    type:"get",
+                    data:{meName:meName,meCardNo:meCardNo},
+                    dataType:"json",
+                    success:function (data) {
+                        if (data) {
+                            $("#t1").empty()
+
+                            $("#t1").append(`<tr id="${data.meId}"><td>${data.meId}</td><td>${data.meName}</td><td>${data.mePhone}</td>
+                                <td>${data.meLevel}</td><td>${data.meCardNo}</td><td>${data.meInTime}</td>
+                                <td><button type="button" onclick="updateMe(${data.meId})">修改</button>
+                                <button type="button" onclick="del(${data.meId})">删除</button></td><tr/>`)
+
+
+                        }
+                    },
+                    error:function () {
+                        $("#t1").empty()
+                        $("#t1").append(`<p style="color: red">没有此会员<p/>`)
+                    }
+
+                })
+
+            })
+
+            $("#div2").hide()
+            $("#btn2").click(()=>{
+                $("#div2").show()
+            })
+
+
+            $("#btn3").click(()=>{
+                $.ajax({
+                    url:"members",
+                    type:"post",
+                    data:$("#form1").serialize(),
+                    dataType:"json",
+                    success:function (data) {
+                        if(data){
+                            alert("添加成功!")
+                            $("#div2").hide()
+                            window.location.reload()
+
+                        }
+
+                    }
+
+
+                })
+
+            })
+
+            $("#div3").hide()
+
+
+            $("#btn4").click(()=>{
+                $.ajax({
+                    url:"members/upd",
+                    type:"post",
+                    data:$("#form2").serialize(),
+                    dataType:"json",
+                    success:function (data) {
+                        if(data){
+                            alert("修改成功!")
+                            $("#div3").hide()
+                            window.location.reload()
+
+                        }
+
+                    }
+
+                })
+            })
+
+
+
+
+
+        })
+
+
+        function updateMe(meId) {
+
+
+            $.ajax({
+                url: "members/"+meId,
+                type:"get",
+
+                dataType:"json",
+                success:function (data) {
+                    if (data) {
+
+                        $("#gxName").val(data.meName)
+                        $("#gxPhone").val(data.mePhone)
+                        $("#gxCard").val(data.meCardNo)
+                        $("#gxLe").val(data.meLevel)
+                    }
+                }
+            })
+
+
+            $("#div3").show()
+            $("#gxmeId").val(meId)
+
+
+        }
+
+
+        function del(meId){
+            if(confirm("确定要删除该员工信息吗?")){
+                $.ajax({
+                    url:"members/"+meId,
+                    type:"delete",
+
+                    success:function(data){
+                        if(data.count=="1"){
+
+
+                            $("#"+meId).empty()
+                        }
+                    }
+                })
+            }
+        }
+    </script>
+</head>
+<body>
+<div>
+<h2>会员管理系统</h2>
+姓名:<input type="text" id="meName">&nbsp;&nbsp;
+    卡号:<input type="text" id="meCardNo">&nbsp;&nbsp;
+    <input type="button" id="btn1" value="查询">&nbsp;&nbsp;
+    <input type="button" id="btn2" value="新增">
+    <br/>
+    <br/>
+    <br/>
+    <table border="1" cellspacing="0">
+        <thead>
+        <tr style="background-color: silver">
+            <td>序号</td>
+            <td>姓名</td>
+            <td>联系电话</td>
+            <td>会员级别</td>
+            <td>会员卡号</td>
+            <td>入会时间</td>
+            <td>操作</td>
+        </tr>
+        </thead>
+        <tbody id="t1">
+
+        </tbody>
+    </table>
+
+
+
+
+</div>
+
+<div id="div2">
+    <h2>会员管理系统</h2>
+    <h3>新增会员</h3>
+    <form id="form1">
+        姓名:<input type="text" name="meName"><br/>
+        联系电话:<input type="text" name="mePhone"><br/>
+        会员卡号:<input type="text" name="meCardNo"><br/>
+        会员级别:<select name="meLevel">
+        <option value="1">一级</option>
+        <option value="2">二级</option>
+        <option value="3">三级</option>
+        <option value="4">四级</option>
+    </select><br/>
+      <input id="btn3" type="button" value="提交">
+    </form>
+
+</div>
+
+
+<div id="div3">
+    <h2>会员管理系统</h2>
+    <h3>修改会员</h3>
+    <form id="form2">
+        <input type="hidden" id="gxmeId" name="meId">
+        姓名:<input type="text" id="gxName" name="meName"><br/>
+        联系电话:<input type="text" id="gxPhone" name="mePhone"><br/>
+        会员卡号:<input type="text" id="gxCard" name="meCardNo"><br/>
+        会员级别:<select name="meLevel" id="gxLe">
+        <option value="1">一级</option>
+        <option value="2">二级</option>
+        <option value="3">三级</option>
+        <option value="4">四级</option>
+         </select><br/>
+        <input id="btn4" type="button" value="提交">
+    </form>
+
+</div>
+
+
+
+
+</body>
+</html>
